@@ -13,9 +13,6 @@ export const metadata: Metadata = {
   title: "Safeguard Sandbox",
   description:
     "A playground for experimenting with safety model's capabilities.",
-  icons: {
-    icon: "/favicon.svg",
-  },
 };
 
 export default function RootLayout({
