@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 
 import { Disclosure } from "@headlessui/react";
 
-const inter = Inter({
+const roboto = Roboto({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-roboto",
 });
 
 export const metadata: Metadata = {
@@ -23,15 +24,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} h-full bg-white dark:bg-gray-950 scheme-light dark:scheme-dark`}
+      className={`${roboto.variable} tracking-wide h-full bg-white dark:bg-gray-950 scheme-light dark:scheme-dark`}
     >
       <body className="h-full">
         <div className="min-h-full">
           <Disclosure
             as="nav"
-            className="border-b border-gray-200 bg-white dark:border-white/10 dark:bg-neutral-900"
+            className="border-b-4 border-gray-200 bg-white dark:border-white/5 dark:bg-neutral-900"
           >
-            <div className="mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto px-4">
               <div className="flex h-16 justify-between">
                 <div className="flex">
                   <div className="flex shrink-0 items-center">
@@ -42,13 +43,7 @@ export default function RootLayout({
             </div>
           </Disclosure>
 
-          <div className="py-10">
-            <main>
-              <div className="mx-auto px-4 py-8 sm:px-6 lg:px-8">
-                {children}
-              </div>
-            </main>
-          </div>
+          <main className="p-2">{children}</main>
         </div>
       </body>
     </html>
