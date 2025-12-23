@@ -1,5 +1,21 @@
-import { BedrockRuntimeClient } from "@aws-sdk/client-bedrock-runtime";
+import {
+  BedrockRuntimeClient,
+  InvokeModelCommand,
+} from "@aws-sdk/client-bedrock-runtime";
+
+import { CONTENT_POLICY_PROMPT } from "@/app/constants";
 import { env } from "./env";
+
+/**
+ * Bedrock response structure for OpenAI-compatible models
+ */
+interface BedrockResponse {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+}
 
 export function createBedrockClient(): BedrockRuntimeClient {
   return new BedrockRuntimeClient({
@@ -45,4 +61,105 @@ export async function testBedrockConnection(): Promise<{
       message: `Failed to connect to AWS Bedrock: ${errorMessage}`,
     };
   }
+}
+
+/**
+ * Extract JSON from response text that may contain reasoning tags
+ * (The model sometimes wraps JSON in <reasoning> tags)
+ *
+ * @param responseText - The raw text response from the model
+ * @returns Extracted JSON string
+ * @throws Error if no JSON is found
+ */
+function extractClassificationJSON(responseText: string): string {
+  const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error("No JSON found in response");
+  }
+  return jsonMatch[0];
+}
+
+/**
+ * Parse Bedrock response body to extract classification result
+ *
+ * @param responseBody - The parsed response body from Bedrock
+ * @returns Classification object with violation, categories, confidence_scores, and rationale
+ * @throws Error if response format is invalid
+ */
+function parseBedrockResponse(responseBody: BedrockResponse): {
+  violation: 0 | 1;
+  categories: string[];
+  confidence_scores: Record<string, number>;
+  rationale: string;
+} {
+  // OpenAI format: { choices: [{ message: { content: "JSON string" } }] }
+  const responseText = responseBody.choices?.[0]?.message?.content;
+
+  if (!responseText) {
+    throw new Error("Invalid response format from Bedrock");
+  }
+
+  const jsonString = extractClassificationJSON(responseText);
+  const classification = JSON.parse(jsonString);
+
+  return {
+    violation: classification.violation,
+    categories: classification.categories || [],
+    confidence_scores: classification.confidence_scores || {},
+    rationale: classification.rationale || "",
+  };
+}
+
+/**
+ * Classify content for safety violations using AWS Bedrock safety models
+ *
+ * @param content - The user-generated content to classify
+ * @param modelId - The Bedrock model ID to use for classification
+ * @returns Classification result with violation status, categories, scores, and rationale
+ * @throws Error if the API call fails or response is invalid
+ */
+export async function classifyContent(
+  content: string,
+  modelId: string,
+): Promise<{
+  violation: 0 | 1;
+  categories: string[];
+  confidence_scores: Record<string, number>;
+  rationale: string;
+}> {
+  const client = createBedrockClient();
+  const messages = [
+    {
+      role: "system",
+      content: CONTENT_POLICY_PROMPT,
+    },
+    {
+      role: "user",
+      content: content,
+    },
+  ];
+  const payload = {
+    messages,
+    max_tokens: 1000,
+    temperature: 0.0,
+  };
+
+  const command = new InvokeModelCommand({
+    modelId,
+    contentType: "application/json",
+    accept: "application/json",
+    body: JSON.stringify(payload),
+  });
+
+  console.log("Invoking Bedrock model with payload:", {
+    modelId,
+    contentLength: content.length,
+  });
+
+  const response = await client.send(command);
+  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+
+  console.log("Bedrock response:", responseBody);
+
+  return parseBedrockResponse(responseBody);
 }

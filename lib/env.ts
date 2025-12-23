@@ -22,7 +22,7 @@ function validateEnv(): Record<RequiredEnvVar, string> {
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(", ")}\n` +
-        `Please ensure these are set in your .env.local file.`
+        `Please ensure these are set in your .env.local file.`,
     );
   }
 
