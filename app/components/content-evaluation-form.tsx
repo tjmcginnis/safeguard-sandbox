@@ -33,7 +33,7 @@ export default function ContentEvaluationForm({
             <button
               type="submit"
               disabled={pending}
-              className="rounded-md inline-flex items-center gap-2 bg-neutral-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-neutral-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-neutral-500 dark:hover:bg-neutral-400 dark:focus-visible:outline-neutral-500"
+              className="rounded-md inline-flex items-center gap-2 bg-neutral-600 px-3 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-neutral-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-neutral-500 dark:hover:bg-neutral-400 dark:focus-visible:outline-neutral-500"
             >
               {pending && <ArrowPathIcon className="h-4 w-4 animate-spin" />}
               Submit

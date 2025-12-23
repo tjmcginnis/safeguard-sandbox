@@ -30,7 +30,7 @@ export default function ModelSwitcher({ defaultValue, options }: Props) {
             <div className="inline-flex divide-x divide-neutral-700 rounded-md outline-hidden dark:divide-neutral-600">
               <div className="inline-flex items-center gap-x-1.5 rounded-l-md bg-neutral-600 px-3 py-2 text-white dark:bg-neutral-500">
                 <CheckIcon aria-hidden="true" className="-ml-0.5 size-5" />
-                <p className="text-sm font-semibold">
+                <p className="text-xs sm:text-sm font-semibold">
                   {options.find((option) => option.value === value)?.title}
                 </p>
               </div>
