@@ -72,7 +72,17 @@ export async function testBedrockConnection(): Promise<{
  * @throws Error if no JSON is found
  */
 function extractClassificationJSON(responseText: string): string {
-  const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+  // Remove reasoning tags if present to avoid matching braces inside them
+  let cleanedText = responseText;
+  const reasoningEndTag = "</reasoning>";
+  const reasoningEndIndex = responseText.indexOf(reasoningEndTag);
+
+  if (reasoningEndIndex !== -1) {
+    // Skip past the closing reasoning tag
+    cleanedText = responseText.substring(reasoningEndIndex + reasoningEndTag.length);
+  }
+
+  const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error("No JSON found in response");
   }
@@ -100,7 +110,7 @@ function parseBedrockResponse(responseBody: BedrockResponse): {
   }
 
   const jsonString = extractClassificationJSON(responseText);
-  const classification = JSON.parse(jsonString);
+  const classification = JSON.parse(jsonString.trim());
 
   return {
     violation: classification.violation,
@@ -157,9 +167,8 @@ export async function classifyContent(
   });
 
   const response = await client.send(command);
-  const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-
-  console.log("Bedrock response:", responseBody);
+  const decodedResponse = new TextDecoder().decode(response.body).trim();
+  const responseBody = JSON.parse(decodedResponse);
 
   return parseBedrockResponse(responseBody);
 }
