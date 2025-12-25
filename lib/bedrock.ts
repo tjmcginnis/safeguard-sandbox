@@ -79,7 +79,9 @@ function extractClassificationJSON(responseText: string): string {
 
   if (reasoningEndIndex !== -1) {
     // Skip past the closing reasoning tag
-    cleanedText = responseText.substring(reasoningEndIndex + reasoningEndTag.length);
+    cleanedText = responseText.substring(
+      reasoningEndIndex + reasoningEndTag.length,
+    );
   }
 
   const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
