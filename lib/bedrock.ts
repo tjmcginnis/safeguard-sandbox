@@ -3,7 +3,6 @@ import {
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 
-import { CONTENT_POLICY_PROMPT } from "@/app/constants";
 import { env } from "./env";
 
 /**
@@ -127,12 +126,14 @@ function parseBedrockResponse(responseBody: BedrockResponse): {
  *
  * @param content - The user-generated content to classify
  * @param modelId - The Bedrock model ID to use for classification
+ * @param prompt - The system prompt to use for content classification
  * @returns Classification result with violation status, categories, scores, and rationale
  * @throws Error if the API call fails or response is invalid
  */
 export async function classifyContent(
   content: string,
   modelId: string,
+  prompt: string,
 ): Promise<{
   violation: 0 | 1;
   categories: string[];
@@ -143,7 +144,7 @@ export async function classifyContent(
   const messages = [
     {
       role: "system",
-      content: CONTENT_POLICY_PROMPT,
+      content: prompt,
     },
     {
       role: "user",

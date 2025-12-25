@@ -2,7 +2,11 @@
 
 import { z } from "zod";
 
-import { MAX_CONTENT_LENGTH, modelOptions } from "@/app/constants";
+import {
+  CONTENT_POLICY_PROMPT,
+  MAX_CONTENT_LENGTH,
+  modelOptions,
+} from "@/app/constants";
 import type { EvalState } from "@/app/types";
 import { classifyContent } from "@/lib/bedrock";
 
@@ -37,7 +41,11 @@ export async function createEval(
   const { content, model } = validatedFields.data;
 
   try {
-    const classification = await classifyContent(content, model);
+    const classification = await classifyContent(
+      content,
+      model,
+      CONTENT_POLICY_PROMPT,
+    );
 
     return {
       content,
